@@ -93,10 +93,10 @@ public class dataCollection {
                                     && outPoint[0] >= 0 && outPoint[0] <= maxWidth
                                     && outPoint[1] >= 0 && outPoint[1] <= maxHeight) {
                                 rgb = raster.getPixel(inPoint[0], inPoint[1], new int[3]);
-                                incomingResult[j] = convertRGB(rgb);
+                                incomingResult[j] = convertRGB(inPoint, rgb);
 
                                 rgb = raster.getPixel(outPoint[0], outPoint[1], new int[3]);
-                                outgoingResult[j] = convertRGB(rgb);
+                                outgoingResult[j] = convertRGB(outPoint, rgb);
                             }
                         }
 
@@ -118,9 +118,9 @@ public class dataCollection {
         return ret;
     }
 
-    static int convertRGB(int[] rgb) {
+    static int convertRGB(int[] point, int[] rgb) {
         if (rgb.length != 3) return -2;
-
+        System.out.println(Arrays.toString(point) + ": " + Arrays.toString(rgb));
         int r = rgb[0];
         int g = rgb[1];
         int b = rgb[2];
@@ -138,8 +138,9 @@ public class dataCollection {
     }
 
     public static void main(String[] args) {
-        System.out.println("Default json path: ./mapping/data.json");
-        String jsonPath = "./mapping/data.json";
+
+        String jsonPath = "./mapping/MapDataStructure.json";
+        System.out.println("Default json path: " + jsonPath);
 
         JSONArray jsonArr = readJson(jsonPath);
         if (jsonArr == null) return;
@@ -149,8 +150,8 @@ public class dataCollection {
             JSONObject intersec = (JSONObject) jsonArr.get(i);
         }
 
-        System.out.println("Default png path: ./data/*.png");
         String dataPath = "./data";
+        System.out.println("Default png path: " + dataPath);
 
         processImg(dataPath, jsonArr);
 
