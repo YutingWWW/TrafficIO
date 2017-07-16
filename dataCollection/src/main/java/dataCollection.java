@@ -12,7 +12,6 @@ import java.awt.image.Raster;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.stream.Stream;
 
 public class dataCollection {
 
@@ -44,7 +43,8 @@ public class dataCollection {
 
         for (File file : files) {
             if (file.isFile()) {
-                System.out.println(file.getName());
+                String filename = file.getName();
+                System.out.println(filename);
                 try {
                     img = ImageIO.read(file);
                     int maxWidth = img.getWidth();
@@ -54,7 +54,7 @@ public class dataCollection {
                         JSONObject intersec = (JSONObject) mapping.get(i);
                         JSONObject result = new JSONObject();
 
-                        long index = (long) intersec.get("index");
+                        int index = Integer.parseInt(intersec.get("index").toString());
                         JSONArray incoming = (JSONArray) intersec.get("incoming");
                         JSONArray outgoing = (JSONArray) intersec.get("outgoing");
                         if (incoming.size() != outgoing.size()) {
@@ -105,6 +105,7 @@ public class dataCollection {
                         result.put("xWay", size);
                         result.put("incoming", Arrays.toString(incomingResult));
                         result.put("outgoing", Arrays.toString(outgoingResult));
+                        result.put("time", filename.substring(0, filename.indexOf(".png")));
                         ret.add(result);
                     }
 
