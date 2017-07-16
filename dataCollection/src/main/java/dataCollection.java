@@ -25,7 +25,7 @@ public class dataCollection {
         return jsonArray;
     }
 
-    private static void processImg(String path, JSONArray mapping) {
+    private static void processImg(String path, String output, JSONArray mapping) {
         File folder = new File(path);
         File[] files = folder.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
@@ -45,6 +45,8 @@ public class dataCollection {
 
                 int len = mapping.size();
                 System.out.println("MapDataStructure size: " + len);
+
+                String time = filename.substring(0, filename.indexOf(".png"));
 
                 try {
                     BufferedImage img = ImageIO.read(file);
@@ -107,11 +109,29 @@ public class dataCollection {
                         result.put("xWay", size);
                         result.put("incoming", Arrays.toString(incomingResult));
                         result.put("outgoing", Arrays.toString(outgoingResult));
-                        result.put("time", filename.substring(0, filename.indexOf(".png")));
+                        result.put("time", time);
                         ret.add(result);
                     }
+
                     System.out.println("Output size: " + ret.size());
-                    System.out.println(ret.toJSONString());
+
+                    File outputDir = new File(output);
+                    outputDir.mkdir();
+
+                    String outputFilename = output + "/" + time + ".json";
+                    FileWriter outputFile = new FileWriter(outputFilename);
+                    try {
+                        outputFile.write(ret.toJSONString());
+                        System.out.println("File output done: " + outputFilename);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        outputFile.flush();
+                        outputFile.close();
+                    }
+
+
+                    //System.out.println(ret.toJSONString());
                     System.out.println();
 
                 } catch (IOException e) {
@@ -124,6 +144,11 @@ public class dataCollection {
     }
 
     private static int convertRGB(int[] rgb) {
+        if (rgb.length != 3) return -1;
+        if (rgb[0] > 225 && rgb[1] > 225 && rgb[2] > 225) {
+            return 0;
+        }
+
         int[] green = new int[]{121, 207, 76};
         int[] orange = new int[]{247, 124, 0};
         int[] red = new int[]{223, 0, 0};
@@ -195,8 +220,11 @@ public class dataCollection {
         */
 
         String dataPath = "../imgData";
+        String outputPath = "../flowData";
+
         System.out.println("Default png path: " + dataPath);
-        processImg(dataPath, jsonArr);
+        System.out.println("Default output path: " + outputPath);
+        processImg(dataPath, outputPath, jsonArr);
 
     }
 }
