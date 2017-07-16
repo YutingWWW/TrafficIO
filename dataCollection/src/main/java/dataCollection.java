@@ -14,7 +14,7 @@ import java.util.Arrays;
 
 public class dataCollection {
 
-    static JSONArray readJson(String path) {
+    private static JSONArray readJson(String path) {
         JSONParser parser = new JSONParser();
         JSONArray jsonArray = null;
         try {
@@ -25,14 +25,17 @@ public class dataCollection {
         return jsonArray;
     }
 
-    static void processImg(String path, JSONArray mapping) {
+    private static void processImg(String path, JSONArray mapping) {
         File folder = new File(path);
         File[] files = folder.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.toLowerCase().endsWith(".png");
             }
         });
-
+        if (files == null || files.length == 0) {
+            System.out.println("No png found");
+            return;
+        }
         for (File file : files) {
             if (file.isFile()) {
                 JSONArray ret = new JSONArray();
@@ -43,11 +46,10 @@ public class dataCollection {
                 int len = mapping.size();
                 System.out.println("MapDataStructure size: " + len);
 
-                BufferedImage img = null;
-                int[] rgb = null;
-
                 try {
-                    img = ImageIO.read(file);
+                    BufferedImage img = ImageIO.read(file);
+                    int[] rgb;
+
                     int maxWidth = img.getWidth();
                     int maxHeight = img.getHeight();
                     Raster raster = img.getRaster();
@@ -93,10 +95,10 @@ public class dataCollection {
                                     && outPoint[0] >= 0 && outPoint[0] <= maxWidth
                                     && outPoint[1] >= 0 && outPoint[1] <= maxHeight) {
                                 rgb = raster.getPixel(inPoint[0], inPoint[1], new int[3]);
-                                incomingResult[j] = convertRGB(inPoint, rgb);
+                                incomingResult[j] = convertRGB(rgb);
 
                                 rgb = raster.getPixel(outPoint[0], outPoint[1], new int[3]);
-                                outgoingResult[j] = convertRGB(outPoint, rgb);
+                                outgoingResult[j] = convertRGB(rgb);
                             }
                         }
 
@@ -121,7 +123,7 @@ public class dataCollection {
         //return ret;
     }
 
-    static int convertRGB(int[] point, int[] rgb) {
+    private static int convertRGB(int[] rgb) {
         int[] green = new int[]{121, 207, 76};
         int[] orange = new int[]{247, 124, 0};
         int[] red = new int[]{223, 0, 0};
@@ -150,12 +152,11 @@ public class dataCollection {
 
         tmp = calColor(rgb, darkRed);
         if (tmp >= 0 && tmp < min) {
-            min = tmp;
             ret = 4;
         }
 
         return ret;
-        
+
         /*
         System.out.println(Arrays.toString(point) + ": " + Arrays.toString(rgb));
         int r = rgb[0];
@@ -170,7 +171,7 @@ public class dataCollection {
         */
     }
 
-    static double calColor(int[] input, int[] target) {
+    private static double calColor(int[] input, int[] target) {
         if (input.length != 3 || target.length != 3) return (-1.0);
         long dotProduct = input[0] * target[0] + input[1] * target[1] + input[2] * target[2];
         double mag = Math.sqrt(Math.pow(input[0], 2) + Math.pow(input[1], 2) + Math.pow(input[2], 2)) *
@@ -186,10 +187,12 @@ public class dataCollection {
         JSONArray jsonArr = readJson(jsonPath);
         if (jsonArr == null) return;
 
+        /*
         int len = jsonArr.size();
         for (int i = 0; i < len; i++) {
             JSONObject intersec = (JSONObject) jsonArr.get(i);
         }
+        */
 
         String dataPath = "../imgData";
         System.out.println("Default png path: " + dataPath);
