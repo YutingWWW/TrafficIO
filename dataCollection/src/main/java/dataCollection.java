@@ -11,7 +11,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.*;
 import java.util.Arrays;
-import java.util.Random;
 
 public class dataCollection {
 
@@ -26,7 +25,7 @@ public class dataCollection {
         return jsonArray;
     }
 
-    static JSONArray processImg(String path, JSONArray mapping) {
+    static void processImg(String path, JSONArray mapping) {
         File folder = new File(path);
         File[] files = folder.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
@@ -34,17 +33,19 @@ public class dataCollection {
             }
         });
 
-        JSONArray ret = new JSONArray();
-        int len = mapping.size();
-        System.out.println("Mapping size: " + len);
-
-        BufferedImage img = null;
-        int[] rgb = null;
-
         for (File file : files) {
             if (file.isFile()) {
+                JSONArray ret = new JSONArray();
+
                 String filename = file.getName();
                 System.out.println(filename);
+
+                int len = mapping.size();
+                System.out.println("MapDataStructure size: " + len);
+
+                BufferedImage img = null;
+                int[] rgb = null;
+
                 try {
                     img = ImageIO.read(file);
                     int maxWidth = img.getWidth();
@@ -107,34 +108,74 @@ public class dataCollection {
                         result.put("time", filename.substring(0, filename.indexOf(".png")));
                         ret.add(result);
                     }
+                    System.out.println("Output size: " + ret.size());
+                    System.out.println(ret.toJSONString());
+                    System.out.println();
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+
         }
-        System.out.println("Total: " + ret.size());
-        System.out.println(ret.toJSONString());
-        return ret;
+        //return ret;
     }
 
     static int convertRGB(int[] point, int[] rgb) {
-        if (rgb.length != 3) return -2;
+        int[] green = new int[]{121, 207, 76};
+        int[] orange = new int[]{247, 124, 0};
+        int[] red = new int[]{223, 0, 0};
+        int[] darkRed = new int[]{153, 20, 16};
+
+        double min = Double.MAX_VALUE;
+        int ret = -1;
+
+        double tmp = calColor(rgb, green);
+        if (tmp >= 0 && tmp < min) {
+            min = tmp;
+            ret = 1;
+        }
+
+        tmp = calColor(rgb, orange);
+        if (tmp >= 0 && tmp < min) {
+            min = tmp;
+            ret = 2;
+        }
+
+        tmp = calColor(rgb, red);
+        if (tmp >= 0 && tmp < min) {
+            min = tmp;
+            ret = 3;
+        }
+
+        tmp = calColor(rgb, darkRed);
+        if (tmp >= 0 && tmp < min) {
+            min = tmp;
+            ret = 4;
+        }
+
+        return ret;
+        
+        /*
         System.out.println(Arrays.toString(point) + ": " + Arrays.toString(rgb));
         int r = rgb[0];
         int g = rgb[1];
         int b = rgb[2];
 
-        if (Math.abs(r - g) < 50 && Math.abs(r - b) < 50 && Math.abs(g - b) < 50) {
-            return 0;
-        }
-        if (r > g && Math.max(r, b) == r) {
-            return 4;
-        }
+        if (g >= 200 && r < 200 && b < 200) return 1;
+        if (r >= 200 && g < 200 && b < 100) return 2;
+        if (r >= 200 && g < 100 && b < 100) return 3;
+        if (r >= 200 && g < 50 && b < 50) return 4;
+        return 0;
+        */
+    }
 
-
-        Random rn = new Random();
-        return rn.nextInt(5) - 1;
+    static double calColor(int[] input, int[] target) {
+        if (input.length != 3 || target.length != 3) return (-1.0);
+        long dotProduct = input[0] * target[0] + input[1] * target[1] + input[2] * target[2];
+        double mag = Math.sqrt(Math.pow(input[0], 2) + Math.pow(input[1], 2) + Math.pow(input[2], 2)) *
+                Math.sqrt(Math.pow(target[0], 2) + Math.pow(target[1], 2) + Math.pow(target[2], 2));
+        return Math.acos(dotProduct / mag);
     }
 
     public static void main(String[] args) {
@@ -152,7 +193,6 @@ public class dataCollection {
 
         String dataPath = "../imgData";
         System.out.println("Default png path: " + dataPath);
-
         processImg(dataPath, jsonArr);
 
     }
