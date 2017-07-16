@@ -62,7 +62,6 @@ public class dataCollection {
                             System.out.println(incoming.toJSONString() + " | " + outgoing.toJSONString());
                             continue;
                         }
-                        //System.out.println("normalIndex: " + intersec.get("index"));
 
                         int size = incoming.size();
                         int[][] inArr = new int[size][2];
@@ -151,7 +150,7 @@ public class dataCollection {
             JSONObject intersec = (JSONObject) jsonArr.get(i);
         }
 
-        String dataPath = "./data";
+        String dataPath = "../imgData";
         System.out.println("Default png path: " + dataPath);
 
         processImg(dataPath, jsonArr);
